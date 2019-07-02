@@ -1,0 +1,10 @@
+[flake8]
+show-source = True
+max-line-length = 80
+statistics = True
+count = True
+exclude =
+    .git,
+    __pycache__,
+    env,
+ignore =
