@@ -1,6 +1,6 @@
 MONGO_HOST = 'mongodb'
 MONGO_PORT = 27017
-MONGO_DBNAME = 'classification_data'
+MONGO_DBNAME = 'data-classification'
 
 MQTT_BROKER = 'mqtt'
 MQTT_PORT = 1883

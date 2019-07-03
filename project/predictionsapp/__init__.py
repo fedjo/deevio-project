@@ -14,11 +14,11 @@ def create_app(app_config=None):
     else:
         app.config.update(app_config)
 
-    # register the database commands
+    # Register command to flush database
     from predictionsapp import db
     db.init_db_command_register(app)
 
-    # register commands for testing
+    # Register commands for testing
     # and coverage
     @app.cli.command(with_appcontext=False)
     def test():
@@ -35,11 +35,11 @@ def create_app(app_config=None):
     app.cli.add_command(test)
     app.cli.add_command(coverage)
 
-    # apply the blueprints to the app
+    # Register blueprint for the Rest api
     from predictionsapp import api
     app.register_blueprint(api.bp)
 
-    # Init mqtt subscription
+    # Init mqtt backend
     app.logger.info("Connecting to MQTT")
     from predictionsapp.mqtt import MQTT
     MQTT(app)
