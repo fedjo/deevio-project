@@ -23,6 +23,9 @@ services:
     environment:
       FLASK_APP: predictionsapp
       FLASK_ENV: development
+    depends_on:
+      - mqtt
+      - mongodb
     command: app-ctl init dev
     volumes:
       - ./project:/project:rw

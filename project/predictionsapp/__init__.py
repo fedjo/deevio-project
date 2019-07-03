@@ -41,7 +41,7 @@ def create_app(app_config=None):
 
     # Init mqtt subscription
     app.logger.info("Connecting to MQTT")
-    # from predictionsapp import mqtt
-    # mqtt.init_mqtt(app)
+    from predictionsapp.mqtt import MQTT
+    MQTT(app)
 
     return app
