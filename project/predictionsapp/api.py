@@ -1,33 +1,55 @@
-from flask import current_app, Blueprint, request, jsonify
+from flask import (current_app, Blueprint, request,
+                   jsonify, make_response, abort)
 
-from predictionsapp.db import (get_predictions_by_imgid,
-                               get_weak_classifications)
+from predictionsapp import db
+
 
 bp = Blueprint('api', __name__)
-# mongoc = MongoClient("mongodb://mongodb:27017") #host uri
-# db = mongoc.mymongodb    #Select the database
 
 
+# Index call
 @bp.route('/', methods=['GET'])
 def index():
-    print("sad")
     return "Hello deevio"
 
 
-@bp.route('/api/v1/prediction/<int:imgid>', methods=['GET'])
+# Get predictions of the specified image
+@bp.route('/api/v1/predictions/<int:imgid>', methods=['GET'])
 def get_predictions(imgid):
+
+    # Get pagination values as request params
     skip = int(request.args['skip']) if 'skip' in request.args else 0
     limit = int(request.args['limit']) if 'limit' in request.args else 0
-    current_app.logger.info("Skip: {}, Limit: {}".format(str(skip), str(limit)))
-    predictions = get_predictions_by_imgid(imgid, skip, limit)
-    return jsonify(predictions)
+    current_app.logger.debug("Skip: {} Limit: {}"
+                             .format(str(skip), str(limit)))
+
+    # Query db for the specified image
+    predictions = db.get_img_predictions(imgid, skip, limit)
+    # If an error occured raise 500 error
+    if predictions is None:
+        abort(500)
+    # If imageId does not exist in database raise 404 not found
+    if len(predictions) == 0:
+        abort(404)
+    return make_response(jsonify(predictions), 200)
 
 
-@bp.route('/api/v1/weakpredictions/', methods=['GET'])
-def get_weak_prediction():
+# Get all weak classifications
+@bp.route('/api/v1/classifications/weak', methods=['GET'])
+def get_weak_classifications():
+
+    # Get weak boundary as request param or set to default value 0.7
     boundary = request.args['boundary'] if 'boundary' in request.args else 0.7
+
+    # Get pagination values as request params or set default values to 0
     skip = int(request.args['skip']) if 'skip' in request.args else 0
     limit = int(request.args['limit']) if 'limit' in request.args else 0
-    current_app.logger.info("Skip: {}, Limit: {} Boud: {}".format(str(skip), str(limit), str(boundary)))
-    weak_classifications = get_weak_classifications(boundary, skip, limit)
-    return jsonify(weak_classifications)
+    current_app.logger.debug("Skip: {}, Limit: {} Boud: {}"
+                             .format(str(skip), str(limit), str(boundary)))
+
+    # Query db for weak classifications
+    weak_classifications = db.get_weak_classifications(boundary, skip, limit)
+    # If an error occured raise 500 error
+    if weak_classifications is None:
+        abort(500)
+    return make_response(jsonify(weak_classifications), 200)
