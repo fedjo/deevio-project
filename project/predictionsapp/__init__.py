@@ -1,4 +1,5 @@
-import os
+import sys
+import subprocess
 
 from flask import Flask
 
@@ -16,6 +17,23 @@ def create_app(app_config=None):
     # register the database commands
     from predictionsapp import db
     db.init_db_command_register(app)
+
+    # register commands for testing
+    # and coverage
+    @app.cli.command(with_appcontext=False)
+    def test():
+        """Runs unit tests."""
+        tests = subprocess.call(['python3', '-m', 'pytest'])
+        sys.exit(tests)
+
+    @app.cli.command(with_appcontext=False)
+    def coverage():
+        subprocess.call(['coverage', 'run', '-m', 'pytest'])
+        cov = subprocess.call(['coverage', 'report'])
+        sys.exit(cov)
+
+    app.cli.add_command(test)
+    app.cli.add_command(coverage)
 
     # apply the blueprints to the app
     from predictionsapp import api

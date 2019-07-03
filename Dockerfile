@@ -1,4 +1,4 @@
-FROM python:3.7-slim-stretch
+FROM python:3.5-slim-stretch
 
 # Install build essentials
 RUN set -x && \

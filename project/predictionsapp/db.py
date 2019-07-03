@@ -5,35 +5,60 @@ from flask import current_app, g
 from flask.cli import with_appcontext
 
 
-def get_db():
+def get_client():
 
-    if 'db' not in g:
-        g.db = MongoClient(
+    if 'dbc' not in g:
+        g.dbc = MongoClient(
             current_app.config['MONGO_HOST'],
             current_app.config['MONGO_PORT']
         )
         try:
             # The ismaster command is cheap and does not require auth.
-            g.db.admin.command('ismaster')
+            g.dbc.admin.command('ismaster')
         except ConnectionFailure:
             current_app.logger.error("Server not available")
         current_app.logger.info("Database connection established!")
 
-    return g.db.current_app.config['MONGO_DBNAME']
+    current_app.logger.info(g)
+    return g.dbc
 
 
-def close_db(e=None):
+def get_db():
+    return get_client()[current_app.config['MONGO_DBNAME']]
 
-    db = g.pop('db', None)
 
-    if db is not None:
-        db.close()
+def get_predictions_by_imgid(imgid, skip, limit):
+    db = get_db()
+    q = {"imageId": str(imgid)}
+    projection = {"_id": False, "output": True}
+    current_app.logger.debug("Excecuting query: {} with projection: {}"
+                             .format(str(q), str(projection)))
+    pred_cursor = db.predictions.find(q, projection).skip(skip).limit(limit)
+    return list(pred_cursor)
+
+
+def get_weak_classifications(prob_boundary, skip, limit):
+    db = get_db()
+    q = {"output.probability": {"$lte": prob_boundary}}
+    projection = {"_id": False}
+    current_app.logger.debug("Excecuting query: {} with projection: {}"
+                             .format(str(q), str(projection)))
+    weak_classifications = db.predictions.find(q, projection).skip(skip).limit(limit)
+    return list(weak_classifications)
+
+
+def close_client(e=None):
+
+    dbc = g.pop('dbc', None)
+
+    if dbc is not None:
+        dbc.close()
 
 
 def init_db():
 
-    db = get_db()
-    db.drop_database(current_app.config['MONGO_DBNAME'])
+    dbc = get_client()
+    dbc.drop_database(current_app.config['MONGO_DBNAME'])
 
 
 @click.command('init-db')
@@ -46,5 +71,5 @@ def init_db_command():
 
 def init_db_command_register(app):
 
-    app.teardown_appcontext(close_db)
+    app.teardown_appcontext(close_client)
     app.cli.add_command(init_db_command)
