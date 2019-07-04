@@ -1,7 +1,7 @@
 import json
 
 import paho.mqtt.client as mqttc
-from predictionsapp.db import insert_classification
+from predictionsapp.db import update_classification
 
 
 class MQTT():
@@ -60,10 +60,11 @@ class MQTT():
     def _on_message(self, client, userdata, msg):
         self.app.logger.info(msg.topic + " " + str(msg.payload))
         msg_decode = str(msg.payload.decode("utf-8", "ignore"))
-        try:
-            # Get a db client connection
-            with self.app.app_context():
+        # Get a db client connection
+        with self.app.app_context():
+            try:
                 classification_doc = json.loads(msg_decode)
-                insert_classification(classification_doc)
-        except Exception as e:
-            self.app.logger.debug(str(e))
+                # insert_classification(classification_doc)
+                update_classification(classification_doc)
+            except Exception as e:
+                self.app.logger.debug(str(e))

@@ -28,6 +28,37 @@ def get_db():
     return get_client()[current_app.config['MONGO_DBNAME']]
 
 
+# Create collection index for specified key
+def create_index(col, key):
+    db = get_db()
+    try:
+        db[col].create_index(key)
+    except Exception as e:
+        current_app.logger.error(str(e))
+    current_app.logger.info("Created index for collection {} and key {}"
+                            .format(col, key))
+
+
+#  Update an existing classification result
+def update_classification(doc):
+    db = get_db()
+    current_app.logger.debug("Updating document to database")
+    q = {"imageId": str(doc['imageId'])}
+    update_op = {"$set": {},
+                 "$push": {"output": {"$each": doc['output']}}
+                 }
+    for k in doc:
+        if 'output' != k:
+            update_op['$set'][k] = doc[k]
+    current_app.logger.debug(update_op)
+    try:
+        res = db.classification.update(q, update_op, True})
+    except OperationFailure as e:
+        current_app.logger.debug(str(e))
+        return None
+    return res
+
+
 # Insert a classification to collection db
 def insert_classification(doc):
     db = get_db()
