@@ -10,6 +10,8 @@ _preinit() {
     echo "Pytest and Coverage report" >&2
     coverage run -m pytest
     coverage report --include="predictionsapp/*"
+    python3 cli_utils/classification_publisher.py warmdb
+    python3 cli_utils/classification_publisher.py pubmqtt &
     return
 }
 
