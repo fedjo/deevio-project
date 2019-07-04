@@ -3,6 +3,13 @@
 set -e
 
 _preinit() {
+    set +x
+    # python3 -m pytest
+    echo "Lint with flake8" >&2
+    flake8 --count
+    echo "Pytest and Coverage report" >&2
+    coverage run -m pytest
+    coverage report --include="predictionsapp/*"
     return
 }
 
@@ -25,14 +32,14 @@ devinit() {
 
 run_tester() {
     set -x
-        flask test
-        $@
+    flask test
+    $@
 }
 
 run_linter() {
     set -x
-        flask lint
-        $@
+    flask lint
+    $@
 }
 
 

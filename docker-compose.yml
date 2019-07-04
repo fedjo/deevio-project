@@ -9,8 +9,8 @@ services:
     hostname: mongodb
     image: mongo:3.6.13-xenial
     restart: always
-    expose:
-      - 27017
+    ports:
+      - 27017:27017
   mongo-express:
     hostname: mongo-express
     image: mongo-express
