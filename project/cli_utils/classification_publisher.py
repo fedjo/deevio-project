@@ -24,6 +24,7 @@ classification_result_tmp = {
 }
 
 
+# Create a prediction object based on the template
 def prediction():
 
     prediction = dict(prediction_tmp)
@@ -50,10 +51,10 @@ def prediction():
     prediction['label'] = label
     bbox = [x_point, y_point, width, height]
     prediction['bbox'] = bbox
-    print(prediction)
     return prediction
 
 
+# Create a classification object based on the template
 def classification_result():
 
     classification_result = dict(classification_result_tmp)
@@ -72,14 +73,15 @@ def classification_result():
 
     # Define the number of prediction
     predno = (i % 3) + 1
+    pred_list = list()
     for p in range(1, predno):
-        classification_result['output'].append(prediction())
+        pred_list.append(prediction())
+    classification_result['output'] = pred_list
 
     classification_result['status'] = status
     classification_result['imagePath'] = imagePath
     classification_result['imageId'] = imageId
 
-    print(classification_result)
     return classification_result
 
 
@@ -128,12 +130,11 @@ if __name__ == "__main__":
         except ConnectionFailure:
             print("Server not available")
         print("Database connection established!")
-        db = dbc.classification_data
+        db = dbc['data-classification']
 
-        while True:
-            res = db.predictions.insert(classification_result())
+        for i in range(1, 150):
+            res = db.classification.insert(classification_result())
             print(res)
-            time.sleep(2)
     else:
         print("This action is not yet specified!")
         sys.exit(-1)
