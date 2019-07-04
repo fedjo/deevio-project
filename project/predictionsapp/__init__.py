@@ -14,6 +14,7 @@ def create_app(app_config=None):
     # Register command to flush database
     from predictionsapp import db
     db.init_db_command_register(app)
+    db.ensure_indexes(app)
 
     # Ensure Indexes
     # with app.app_context():

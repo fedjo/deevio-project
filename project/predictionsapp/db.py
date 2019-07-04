@@ -1,5 +1,6 @@
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure, OperationFailure
+
 import click
 from flask import current_app, g
 from flask.cli import with_appcontext
@@ -39,6 +40,12 @@ def create_index(col, key):
                             .format(col, key))
 
 
+# Ensure indexes
+def ensure_indexes(app):
+    with app.app_context():
+        create_index("classification", "imageId")
+
+
 #  Update an existing classification result
 def update_classification(doc):
     db = get_db()
@@ -50,9 +57,8 @@ def update_classification(doc):
     for k in doc:
         if 'output' != k:
             update_op['$set'][k] = doc[k]
-    current_app.logger.debug(update_op)
     try:
-        res = db.classification.update(q, update_op, True})
+        res = db.classification.update(q, update_op, True)
     except OperationFailure as e:
         current_app.logger.debug(str(e))
         return None
