@@ -49,9 +49,6 @@ class MQTT():
 
     def _on_connect(self, client, userdata, flags, rc):
         self.app.logger.info("Connected with result code " + str(rc))
-
-        # Subscribing in on_connect() means that if we lose the connection and
-        # reconnect then subscriptions will be renewed.
         client.subscribe("new_prediction")
 
     def _on_subscribe(self, client, userdata, mid, granted_qos):
@@ -64,7 +61,6 @@ class MQTT():
         with self.app.app_context():
             try:
                 classification_doc = json.loads(msg_decode)
-                # insert_classification(classification_doc)
                 rs = update_classification(classification_doc)
                 if rs:
                     self.app.logger.debug("Document updated/inserted success!")

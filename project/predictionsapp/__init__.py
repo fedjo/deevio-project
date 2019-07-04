@@ -14,11 +14,8 @@ def create_app(app_config=None):
     # Register command to flush database
     from predictionsapp import db
     db.init_db_command_register(app)
-    db.ensure_indexes(app)
-
     # Ensure Indexes
-    # with app.app_context():
-    #    db.create_index('classification', 'imageId')
+    db.ensure_indexes(app)
 
     # Register blueprint for the Rest api
     from predictionsapp import api
