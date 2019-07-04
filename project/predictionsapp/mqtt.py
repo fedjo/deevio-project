@@ -65,6 +65,11 @@ class MQTT():
             try:
                 classification_doc = json.loads(msg_decode)
                 # insert_classification(classification_doc)
-                update_classification(classification_doc)
+                rs = update_classification(classification_doc)
+                if rs:
+                    self.app.logger.debug("Document updated/inserted success!")
+                else:
+                    self.app.logger.debug("Document not updated/inserted")
+
             except Exception as e:
                 self.app.logger.debug(str(e))

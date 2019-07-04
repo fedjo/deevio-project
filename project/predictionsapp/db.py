@@ -52,17 +52,22 @@ def update_classification(doc):
     current_app.logger.debug("Updating document to database")
     q = {"imageId": str(doc['imageId'])}
     update_op = {"$set": {},
-                 "$push": {"output": {"$each": doc['output']}}
+                 "$push": {}
                  }
     for k in doc:
-        if 'output' != k:
+        if type(doc[k]) is not list:
             update_op['$set'][k] = doc[k]
+        else:
+            update_op['$push'][k] = {"$each": doc[k]}
+    current_app.logger.debug(update_op)
     try:
-        res = db.classification.update(q, update_op, True)
+        res = db.classification.update_one(q, update_op, True)
     except OperationFailure as e:
         current_app.logger.debug(str(e))
         return None
-    return res
+    if not res.upserted_id:
+        return res.modified_count
+    return res.upserted_id
 
 
 # Insert a classification to collection db
