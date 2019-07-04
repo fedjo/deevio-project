@@ -29,9 +29,40 @@ services:
     command: app-ctl init dev
     volumes:
       - ./project:/project:rw
-      - static:/facerec/project/static:rw
       - ./requirements.txt:/requirements.txt
     ports:
       - 5000:5000
-volumes:
-  static: {}
+  prometheus:
+    hostname: prometheus
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    # - ./prometheus_db/:/var/lib/prometheus
+    # - ./alert.rules:/etc/prometheus/alert.rules
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - 9090:9090
+  node-exporter:
+    image: prom/node-exporter
+    ports:
+      - '9100:9100'
+  grafana:
+    image: grafana/grafana
+    # volumes:
+      # - ./grafana_db/:/var/lib/grafana
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: mypass
+    depends_on:
+      - prometheus
+    ports:
+      - 3000:3000
+  cadvisor:
+    image: google/cadvisor:latest
+    ports:
+      - 8080:8080
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
