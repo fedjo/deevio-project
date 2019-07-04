@@ -28,8 +28,8 @@ def get_db():
     return get_client()[current_app.config['MONGO_DBNAME']]
 
 
-# Insert a classification to the database
-def insert_prediction(doc):
+# Insert a classification to collection db
+def insert_classification(doc):
     db = get_db()
     current_app.logger.debug("Adding document to database")
     try:
@@ -38,6 +38,30 @@ def insert_prediction(doc):
         current_app.logger.debug(str(e))
         return None
     return res.inserted_id
+
+
+# Remove a classification from collection db
+def remove_classification_by_id(oid):
+    db = get_db()
+    current_app.logger.debug("Deleting document from database")
+    q = {"_id": oid}
+    try:
+        res = db.classification.delete_one(q)
+    except Exception as e:
+        current_app.logger.debug(str(e))
+    return res.deleted_count
+
+
+# Remove a classification from collection db
+def remove_classification_by_imgid(imgid):
+    db = get_db()
+    current_app.logger.debug("Deleting document from database")
+    q = {"imageId": str(imgid)}
+    try:
+        res = db.classification.delete_one(q)
+    except Exception as e:
+        current_app.logger.debug(str(e))
+    return res.deleted_count
 
 
 # Get image predictions
@@ -71,7 +95,7 @@ def get_weak_classifications(prob_boundary, skip, limit):
                              .format(str(q), str(projection)))
     try:
         cursor = (db.classification.find(q, projection)
-                                .skip(skip).limit(limit)
+                  .skip(skip).limit(limit)
                   )
     except OperationFailure as e:
         current_app.logger.debug(str(e))

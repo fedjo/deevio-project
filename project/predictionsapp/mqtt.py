@@ -1,6 +1,7 @@
 import json
 
 import paho.mqtt.client as mqttc
+from predictionsapp.db import insert_classification
 
 
 class MQTT():
@@ -35,6 +36,7 @@ class MQTT():
             self.broker_keepalive
         )
 
+        # Check if connection successful otherwise inform
         if rc == 0:
             app.logger.info("MQTT broker connected!")
         else:
@@ -57,3 +59,11 @@ class MQTT():
 
     def _on_message(self, client, userdata, msg):
         self.app.logger.info(msg.topic + " " + str(msg.payload))
+        msg_decode = str(msg.payload.decode("utf-8", "ignore"))
+        try:
+            # Get a db client connection
+            with self.app.app_context():
+                classification_doc = json.loads(msg_decode)
+                insert_classification(classification_doc)
+        except Exception as e:
+            self.app.logger.debug(str(e))
