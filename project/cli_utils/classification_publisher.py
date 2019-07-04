@@ -134,7 +134,7 @@ if __name__ == "__main__":
 
         for i in range(1, 150):
             res = db.classification.insert(classification_result())
-            print(res)
+            print("Added object with _id: " + str(res))
     else:
         print("This action is not yet specified!")
         sys.exit(-1)

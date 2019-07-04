@@ -1,0 +1,36 @@
+version: '2'
+services:
+  mqtt:
+    hostname: mqtt
+    image: toke/mosquitto
+    ports:
+      - 1883:1883
+  mongodb:
+    hostname: mongodb
+    image: mongo:3.6.13-xenial
+    restart: always
+    ports:
+      - 27017:27017
+  mongo-express:
+    hostname: mongo-express
+    image: mongo-express
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongodb
+    ports:
+      - 8081:8081
+  app:
+    image: deeviochal:latest
+    environment:
+      FLASK_APP: predictionsapp
+    depends_on:
+      - mqtt
+      - mongodb
+    command: app-ctl init prod
+    volumes:
+      - ./project:/project:rw
+      - static:/facerec/project/static:rw
+      - ./requirements.txt:/requirements.txt
+    ports:
+      - 5000:5000
+volumes:
+  static: {}

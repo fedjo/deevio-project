@@ -2,6 +2,18 @@
 
 set -e
 
+_warmdb() {
+    set +x
+    python3 cli_utils/classification_publisher.py warmdb
+    return
+}
+
+_pubmqtt() {
+    set +x
+    python3 cli_utils/classification_publisher.py pubmqtt &
+    return
+}
+
 _preinit() {
     set +x
     # python3 -m pytest
@@ -10,8 +22,6 @@ _preinit() {
     echo "Pytest and Coverage report" >&2
     coverage run -m pytest
     coverage report --include="predictionsapp/*"
-    python3 cli_utils/classification_publisher.py warmdb
-    python3 cli_utils/classification_publisher.py pubmqtt &
     return
 }
 
@@ -22,12 +32,15 @@ _postinit() {
 prodinit() {
     set -x
     _preinit
+    flask run --host $HTTP_SOCKET
     _postinit
 }
 
 devinit() {
     set -x
     _preinit
+    _warmdb
+    _pubmqtt
     flask run --host $HTTP_SOCKET
     _postinit
 }
