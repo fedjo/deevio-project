@@ -23,11 +23,13 @@ def get_predictions(imgid):
     current_app.logger.debug("Skip: {} Limit: {}"
                              .format(str(skip), str(limit)))
 
-    # Query db for the specified image
-    predictions = db.get_img_predictions(imgid, skip, limit)
-    # If an error occured raise 500 error
-    if predictions is None:
+    try:
+        # Query db for the specified image
+        predictions = db.get_img_predictions(imgid, skip, limit)
+    except Exception:
+        # If an error occured raise 500 error
         abort(500)
+
     # If imageId does not exist in database raise 404 not found
     if len(predictions) == 0:
         abort(404)
@@ -47,9 +49,11 @@ def get_weak_classifications():
     current_app.logger.debug("Skip: {}, Limit: {} Boud: {}"
                              .format(str(skip), str(limit), str(boundary)))
 
-    # Query db for weak classifications
-    weak_classifications = db.get_weak_classifications(boundary, skip, limit)
-    # If an error occured raise 500 error
-    if weak_classifications is None:
+    try:
+        # Query db for weak classifications
+        weak_classifications = db.get_weak_classifications(boundary,
+                                                           skip, limit)
+    except Exception:
+        # If an error occured raise 500 error
         abort(500)
     return make_response(jsonify(weak_classifications), 200)

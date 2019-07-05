@@ -61,11 +61,13 @@ class MQTT():
         with self.app.app_context():
             try:
                 classification_doc = json.loads(msg_decode)
-                rs = update_classification(classification_doc)
-                if rs:
-                    self.app.logger.debug("Document updated/inserted success!")
-                else:
+                try:
+                    update_classification(classification_doc)
+                except Exception as e:
                     self.app.logger.debug("Document not updated/inserted")
+                    client.publish(str(e))
+
+                self.app.logger.debug("Document updated/inserted success!")
 
             except Exception as e:
                 self.app.logger.debug(str(e))
