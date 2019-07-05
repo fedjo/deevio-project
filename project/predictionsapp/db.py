@@ -184,4 +184,5 @@ def init_db_command():
 # Register CLI command
 def init_db_command_register(app):
     app.teardown_appcontext(close_client)
+    app.teardown_request(close_client)
     app.cli.add_command(init_db_command)
