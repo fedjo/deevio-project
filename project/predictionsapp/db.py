@@ -19,6 +19,7 @@ def get_client():
             g.dbc.admin.command('ismaster')
         except ConnectionFailure:
             current_app.logger.error("Server not available")
+            raise
         current_app.logger.info("Database connection established!")
 
     return g.dbc
@@ -36,6 +37,7 @@ def create_index(col, key):
         db[col].create_index(key)
     except Exception as e:
         current_app.logger.error(str(e))
+        raise
     current_app.logger.info("Created index for collection {} and key {}"
                             .format(col, key))
 
@@ -64,6 +66,7 @@ def update_classification(doc):
         res = db.classification.update_one(q, update_op, True)
     except OperationFailure as e:
         current_app.logger.debug(str(e))
+        raise
         return None
     if not res.upserted_id:
         return res.modified_count
@@ -78,6 +81,7 @@ def insert_classification(doc):
         res = db.classification.insert_one(doc)
     except OperationFailure as e:
         current_app.logger.debug(str(e))
+        raise
         return None
     return res.inserted_id
 
@@ -91,6 +95,7 @@ def remove_classification_by_id(oid):
         res = db.classification.delete_one(q)
     except Exception as e:
         current_app.logger.debug(str(e))
+        raise
     return res.deleted_count
 
 
@@ -103,6 +108,7 @@ def remove_classification_by_imgid(imgid):
         res = db.classification.delete_one(q)
     except Exception as e:
         current_app.logger.debug(str(e))
+        raise
     return res.deleted_count
 
 
@@ -122,6 +128,7 @@ def get_img_predictions(imgid, skip, limit):
                   )
     except OperationFailure as e:
         current_app.logger.debug(str(e))
+        raise
         return None
     return list(cursor)
 
@@ -141,6 +148,7 @@ def get_weak_classifications(prob_boundary, skip, limit):
                   )
     except OperationFailure as e:
         current_app.logger.debug(str(e))
+        raise
         return None
     return list(cursor)
 
