@@ -16,7 +16,7 @@ docker-compose
 - docker
 - docker-compose
 
-## Usage
+## Installation
 1. Clone this repo and go to repo folder
 ```
 git clone https://github.com/fedjo/deevio-project.git && cd deevio-project
@@ -33,5 +33,18 @@ docker-compose up -d
 ```
 docker-compose logs -f app
 ```
+The application is running on http://127.0.0.1:5000
+
+## Documentation
+Request predictions for specific image
+```
+/api/v1/predictions/<imageId>
+```
+Request weak classifications
+```
+/api/v1/classifications/weak
+```
+You can publish classification results to local mosquitto broker on ```localhost:1883```.
+
 
 For more info please read the [docs](doc/)
