@@ -37,8 +37,8 @@ services:
     image: prom/prometheus:latest
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
-    # - ./prometheus_db/:/var/lib/prometheus
-    # - ./alert.rules:/etc/prometheus/alert.rules
+      - ./prometheus_db/:/var/lib/prometheus
+      - ./alert.rules:/etc/prometheus/alert.rules
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
     ports:
@@ -49,8 +49,8 @@ services:
       - '9100:9100'
   grafana:
     image: grafana/grafana
-    # volumes:
-      # - ./grafana_db/:/var/lib/grafana
+     volumes:
+       - ./grafana_db/:/var/lib/grafana
     environment:
       GF_SECURITY_ADMIN_PASSWORD: mypass
     depends_on:
