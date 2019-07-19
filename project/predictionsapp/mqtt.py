@@ -26,22 +26,30 @@ class MQTT():
         self.client.on_subscribe = self._on_subscribe
         self.client.on_message = self._on_message
 
-        # Connecting
-        self.client.loop_start()
-        app.logger.info("Started mqtt looping")
+        try:
+            # Connecting
+            self.client.loop_start()
+            app.logger.info("Started mqtt looping")
 
-        rc = self.client.connect(
-            self.broker_url,
-            self.broker_port,
-            self.broker_keepalive
-        )
+            rc = self.client.connect(
+                self.broker_url,
+                self.broker_port,
+                self.broker_keepalive
+            )
 
-        # Check if connection successful otherwise inform
-        if rc == 0:
-            app.logger.info("MQTT broker connected!")
-        else:
-            app.logger.error("Could not connect to MQTT Broker, \
-                             Error Code: {0}".format(rc))
+            if rc == 0:
+                self.app.logger.info("Connected with result code " + str(rc))
+            else:
+                self.app.logger.error("Bad connection result code " + str(rc))
+
+            while not self.connected:
+                self.app.logger.debug("Waiting to establish connection...")
+            self.client.subscribe("new_prediction")
+
+        except Exception as e:
+            app.logger.error("Mqtt connection failed!")
+            app.logger.error(str(e))
+            raise
 
     def disconnect(self):
         self.client.loop_stop()
@@ -49,7 +57,7 @@ class MQTT():
 
     def _on_connect(self, client, userdata, flags, rc):
         self.app.logger.info("Connected with result code " + str(rc))
-        client.subscribe("new_prediction")
+        self.connected = True
 
     def _on_subscribe(self, client, userdata, mid, granted_qos):
         self.app.logger.info("Successfully subscribed with mid " + str(mid))
@@ -61,13 +69,8 @@ class MQTT():
         with self.app.app_context():
             try:
                 classification_doc = json.loads(msg_decode)
-                try:
-                    update_classification(classification_doc)
-                except Exception as e:
-                    self.app.logger.debug("Document not updated/inserted")
-                    client.publish(str(e))
-
+                update_classification(classification_doc)
                 self.app.logger.debug("Document updated/inserted success!")
-
             except Exception as e:
-                self.app.logger.debug(str(e))
+                self.app.logger.debug("Document not updated/inserted")
+                client.publish(str(e))
