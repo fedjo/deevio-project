@@ -28,8 +28,7 @@ services:
       - mongodb
     command: app-ctl init dev
     volumes:
-      - ./project:/project:rw
-      - static:/facerec/project/static:rw
+      - ./project:/service/project:rw
       - ./requirements.txt:/requirements.txt
     ports:
       - 5000:5000

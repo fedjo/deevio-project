@@ -6,3 +6,5 @@
 *.swo
 *.backup
 *.coverage
+*.tex
+*.bak
