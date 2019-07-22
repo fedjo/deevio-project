@@ -4,13 +4,13 @@ set -e
 
 _warmdb() {
     set +x
-    python3 cli_utils/classification_publisher.py warmdb
+    su -m -c "python3 cli_utils/classification_publisher.py warmdb" - $DEEVIO_USER
     return
 }
 
 _pubmqtt() {
     set +x
-    python3 cli_utils/classification_publisher.py pubmqtt &
+    su -m -c "python3 cli_utils/classification_publisher.py pubmqtt" - $DEEVIO_USER &
     return
 }
 
@@ -18,10 +18,10 @@ _preinit() {
     set +x
     # python3 -m pytest
     echo "Lint with flake8" >&2
-    flake8 --count
+    su -m -c "flake8 --count" - $DEEVIO_USER
     echo "Pytest and Coverage report" >&2
-    coverage run -m pytest
-    coverage report --include="predictionsapp/*"
+    su -m -c "coverage run -m pytest" - $DEEVIO_USER
+    su -m -c "coverage report --include=\"predictionsapp/*\"" - $DEEVIO_USER
     return
 }
 
@@ -32,7 +32,7 @@ _postinit() {
 prodinit() {
     set -x
     _preinit
-    flask run --host $HTTP_SOCKET
+    su -m -c "flask run --host $HTTP_SOCKET" - $DEEVIO_USER
     _postinit
 }
 
@@ -41,20 +41,8 @@ devinit() {
     _preinit
     _warmdb
     _pubmqtt
-    flask run --host $HTTP_SOCKET
+    su -m -c "flask run --host $HTTP_SOCKET" - $DEEVIO_USER
     _postinit
-}
-
-run_tester() {
-    set -x
-    flask test
-    $@
-}
-
-run_linter() {
-    set -x
-    flask lint
-    $@
 }
 
 

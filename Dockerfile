@@ -5,24 +5,32 @@ RUN set -x && \
     pip3 install --upgrade pip setuptools && \
     find / -name '*.py[co]' -delete
 
-# Add requirements file
-ADD requirements.txt ctl.sh .flake8 /opt/
-
-# Install project requirements
-RUN pip install --no-cache-dir -r /opt/requirements.txt
-
-# Link ctl.sh to /usr/local/bin
-RUN ln -s /opt/ctl.sh /usr/local/bin/app-ctl
-
-# Add source code
-COPY project/ /service/project
-
-# Switch working directory to source code.
-WORKDIR /service/project
+# Add and install project requirements file
+COPY requirements.txt  /tmp/web-requirements.txt
+RUN set -x && \
+    pip install --no-cache-dir -r /tmp/web-requirements.txt && \
+    find / -name '*.py[co]' -delete
 
 # Set enviromental  variable for my predictionsapp
-ENV PROJECT_DIR=/service/project \
-    HTTP_SOCKET=0.0.0.0
+ENV APP_DIR=/service/project \
+    PROJECT_DIR=/service \
+    HTTP_SOCKET=0.0.0.0 \
+    DEEVIO_USER=deevio \
+    DEEVIO_GROUP=deevio
+
+# Create non root user and groups.
+RUN set -x && \
+    groupadd --system --gid 1000 $DEEVIO_GROUP && \
+    useradd --system --gid $DEEVIO_GROUP --uid 1000 -m $DEEVIO_USER
+
+# Add source code
+COPY . /service
+
+# Link ctl.sh to /usr/local/bin
+RUN ln -s $PROJECT_DIR/ctl.sh /usr/local/bin/app-ctl
+
+# Switch working directory to source code.
+WORKDIR $APP_DIR
 
 # Pass version name and date during build, and persist in the img as env vars.
 ARG BUILD_VERSION
