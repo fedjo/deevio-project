@@ -32,7 +32,7 @@ _postinit() {
 prodinit() {
     set -x
     _preinit
-    su -m -c "flask run --host $HTTP_SOCKET" - $DEEVIO_USER
+    su -m -c "flask run --no-reload --host $HTTP_SOCKET" - $DEEVIO_USER
     _postinit
 }
 
@@ -41,7 +41,7 @@ devinit() {
     _preinit
     _warmdb
     _pubmqtt
-    su -m -c "flask run --host $HTTP_SOCKET" - $DEEVIO_USER
+    su -m -c "flask run --no-reload --host $HTTP_SOCKET" - $DEEVIO_USER
     _postinit
 }
 
