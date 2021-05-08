@@ -4,7 +4,7 @@ Click==7.0
 coverage==4.5.3
 dnspython==1.16.0
 entrypoints==0.3
-eventlet==0.25.0
+eventlet==0.31.0
 flake8==3.7.7
 Flask==1.0.3
 greenlet==0.4.15
